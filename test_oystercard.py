@@ -6,39 +6,20 @@ from travel_station import TravelStation
 
 class TestOysterCard:
 
-    def test_holborn_to_hammersmith(self):
-        # Load card with £30
-        oysetercard = OysterCard(30)
-        assert oysetercard.getBalance() == 30
+    def test_inadequate_balance(self):
+        # Load card with £1
+        oysetercard = OysterCard(1)
+        assert oysetercard.getBalance() == 1
 
-        # Swipe in at HOLBORN and out at EARL'S COURT
-        oysetercard.swipeIn(Stations.HOLBORN.value, TravelMode(Modes.TUBE))
-        oysetercard.swipeOut(Stations.EARLS_COURT.value,
-                             TravelMode(Modes.TUBE))
+        # Swipe in at HOLBORN for a TUBE ride
+        message = oysetercard.swipeIn(
+            Stations.HOLBORN.value, TravelMode(Modes.TUBE))
+        assert message == "You don't have enough balance for the trip"
 
-        # Expected balance £30 - £2.50 = £27.50
-        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value
-        assert oysetercard.getBalance() == expected_balance
-
-        # Swipe in at EARL'S COURT for a bus trip to Chelsea
-        oysetercard.swipeIn(Stations.EARLS_COURT.value, TravelMode(Modes.BUS))
-        oysetercard.swipeOut(TravelStation(
-            "Chelsea", []), TravelMode(Modes.BUS))
-
-        # Expected balance £30 - (£2.50 - £1.80) = £25.70
-        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value - \
-            Fares.ANY_BUS_TRIP.value
-        assert oysetercard.getBalance() == expected_balance
-
-        # Swipe in at EARL'S COURT and out at HAMMERSMITH
-        oysetercard.swipeIn(Stations.EARLS_COURT.value, TravelMode(Modes.TUBE))
-        oysetercard.swipeOut(Stations.HAMMERSMITH.value,
-                             TravelMode(Modes.TUBE))
-
-        # Expected balance £30 - (£2.50 - £1.80 - £2.00) = £23.70
-        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value - \
-            Fares.ANY_BUS_TRIP.value - Fares.ONE_ZONE_OUTSIDE_ZONE1.value
-        assert oysetercard.getBalance() == expected_balance
+        # Swipe in at EARL'S COURT for a BUS ride
+        message = oysetercard.swipeIn(
+            Stations.EARLS_COURT.value, TravelMode(Modes.BUS))
+        assert message == "You don't have enough balance for the trip"
 
     def test_swipein_only_tube(self):
         # Load card with £30
@@ -90,17 +71,36 @@ class TestOysterCard:
         expected_balance = 30 - Fares.ANY_BUS_TRIP.value
         assert oysetercard.getBalance() == expected_balance
 
-    def test_inadequate_balance(self):
-        # Load card with £1
-        oysetercard = OysterCard(1)
-        assert oysetercard.getBalance() == 1
+    def test_holborn_to_hammersmith(self):
+        # Load card with £30
+        oysetercard = OysterCard(30)
+        assert oysetercard.getBalance() == 30
 
-        # Swipe in at HOLBORN for a TUBE ride
-        message = oysetercard.swipeIn(
-            Stations.HOLBORN.value, TravelMode(Modes.TUBE))
-        assert message == "You don't have enough balance for the trip"
+        # Swipe in at HOLBORN and out at EARL'S COURT
+        oysetercard.swipeIn(Stations.HOLBORN.value, TravelMode(Modes.TUBE))
+        oysetercard.swipeOut(Stations.EARLS_COURT.value,
+                             TravelMode(Modes.TUBE))
 
-        # Swipe in at EARL'S COURT for a BUS ride
-        message = oysetercard.swipeIn(
-            Stations.EARLS_COURT.value, TravelMode(Modes.BUS))
-        assert message == "You don't have enough balance for the trip"
+        # Expected balance £30 - £2.50 = £27.50
+        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value
+        assert oysetercard.getBalance() == expected_balance
+
+        # Swipe in at EARL'S COURT for a bus trip to Chelsea
+        oysetercard.swipeIn(Stations.EARLS_COURT.value, TravelMode(Modes.BUS))
+        oysetercard.swipeOut(TravelStation(
+            "Chelsea", []), TravelMode(Modes.BUS))
+
+        # Expected balance £30 - (£2.50 - £1.80) = £25.70
+        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value - \
+            Fares.ANY_BUS_TRIP.value
+        assert oysetercard.getBalance() == expected_balance
+
+        # Swipe in at EARL'S COURT and out at HAMMERSMITH
+        oysetercard.swipeIn(Stations.EARLS_COURT.value, TravelMode(Modes.TUBE))
+        oysetercard.swipeOut(Stations.HAMMERSMITH.value,
+                             TravelMode(Modes.TUBE))
+
+        # Expected balance £30 - (£2.50 - £1.80 - £2.00) = £23.70
+        expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value - \
+            Fares.ANY_BUS_TRIP.value - Fares.ONE_ZONE_OUTSIDE_ZONE1.value
+        assert oysetercard.getBalance() == expected_balance
