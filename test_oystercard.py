@@ -1,3 +1,4 @@
+import pytest
 from oystercard import OysterCard
 from travel_mode import TravelMode
 from constants import Modes, Stations, Fares
@@ -104,3 +105,13 @@ class TestOysterCard:
         expected_balance = 30 - Fares.ANYWHERE_IN_ZONE1.value - \
             Fares.ANY_BUS_TRIP.value - Fares.ONE_ZONE_OUTSIDE_ZONE1.value
         assert oysetercard.getBalance() == expected_balance
+
+    def test_invalid_travel_mode(self):
+        with pytest.raises(ValueError) as excinfo:
+            # Load card with £1
+            oysetercard = OysterCard(1)
+
+            # Swipe in with unknown travel mode
+            message = oysetercard.swipeIn(
+                Stations.HOLBORN.value, TravelMode("Cycle"))
+        assert str(excinfo.value) == "Invalid Travel Mode"

@@ -11,22 +11,35 @@ class OysterCard():
         self.exit_station = None
         self.balance = amount
 
+    def getBaseFare(self, travelmode: TravelMode) -> float:
+        """
+        Gets the base fare for a travel mode
+
+        Args:
+            travelmode (TravelMode): The mode of travel, tube or bus
+        Return:
+            float: The base fare of the travel mode.
+        """
+        base_fares = {
+            Modes.BUS: Fares.ANY_BUS_TRIP.value,
+            Modes.TUBE: Fares.MAX_FARE.value
+        }
+        fare_value = base_fares.get(travelmode.type)
+        if fare_value == None:
+            raise ValueError("Invalid Travel Mode")
+        return fare_value
+
     def swipeIn(self, station: TravelStation, travelmode: TravelMode) -> str:
         """
         Handles the "Swipe In" event at the station barriers
 
         Args:
             station (TravelStation): The station where the event is taking place
-            mode (TravelMode): The mode of travel, tube or bus
+            travelmode (TravelMode): The mode of travel, tube or bus
         Return:
             str: The outcome of the swipe in event.
         """
-        base_fares = {
-            Modes.BUS: Fares.ANY_BUS_TRIP.value,
-            Modes.TUBE: Fares.MAX_FARE.value
-        }
-
-        self.fare_value = base_fares.get(travelmode.type)
+        self.fare_value = self.getBaseFare(travelmode)
 
         if (self.balance < self.fare_value):
             return "You don't have enough balance for the trip"
@@ -36,30 +49,31 @@ class OysterCard():
 
         return f"Welcome to {station.name} station! Enjoy your trip."
 
-    def swipeOut(self, station: TravelStation, mode: TravelMode) -> str:
+    def swipeOut(self, station: TravelStation, travelmode: TravelMode) -> str:
         """
         Handles the "Swipe Out" event at the station barriers
 
         Args:
             station (TravelStation): The station where the event is taking place
-            mode (TravelMode): The mode of travel, tube or bus
+            travelmode (TravelMode): The mode of travel, tube or bus
         Return:
             str: The outcome of the swipe out event.
         """
         self.exit_station = station
+        base_fare = self.getBaseFare(travelmode)
 
-        if (mode.type == Modes.TUBE):
+        if (travelmode.type == Modes.TUBE):
             if self.start_station:
                 tube_travel = TubeTravel(self.start_station, self.exit_station)
                 self.fare_value = tube_travel.getCost()
                 self.balance = (
-                    self.balance + Fares.MAX_FARE.value) - self.fare_value
+                    self.balance + base_fare) - self.fare_value
             else:
-                self.balance = self.balance - Fares.MAX_FARE.value
+                self.balance = self.balance - base_fare
 
-        if (mode.type == Modes.BUS):
+        if (travelmode.type == Modes.BUS):
             if not self.start_station:
-                self.balance = self.balance - Fares.ANY_BUS_TRIP.value
+                self.balance = self.balance - base_fare
 
         return f"Goodbye! Exit at {station.name} station."
 
