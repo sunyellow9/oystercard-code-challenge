@@ -11,7 +11,7 @@ class OysterCard():
         self.exit_station = None
         self.balance = amount
 
-    def swipeIn(self, station: TravelStation, mode: TravelMode) -> str:
+    def swipeIn(self, station: TravelStation, travelmode: TravelMode) -> str:
         """
         Handles the "Swipe In" event at the station barriers
 
@@ -21,15 +21,18 @@ class OysterCard():
         Return:
             str: The outcome of the swipe in event.
         """
+        base_fares = {
+            Modes.BUS: Fares.ANY_BUS_TRIP.value,
+            Modes.TUBE: Fares.MAX_FARE.value
+        }
 
-        self.fare_value = Fares.ANY_BUS_TRIP.value if mode.type == Modes.BUS else Fares.MAX_FARE.value
+        self.fare_value = base_fares.get(travelmode.type)
 
         if (self.balance < self.fare_value):
             return "You don't have enough balance for the trip"
 
         self.balance = self.balance - self.fare_value
-        if (mode.type != Modes.BUS):
-            self.start_station = station
+        self.start_station = station
 
         return f"Welcome to {station.name} station! Enjoy your trip."
 
@@ -43,10 +46,9 @@ class OysterCard():
         Return:
             str: The outcome of the swipe out event.
         """
+        self.exit_station = station
 
         if (mode.type == Modes.TUBE):
-            self.exit_station = station
-
             if self.start_station:
                 tube_travel = TubeTravel(self.start_station, self.exit_station)
                 self.fare_value = tube_travel.getCost()
